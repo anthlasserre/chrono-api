@@ -29,6 +29,10 @@ AppDataSource.initialize()
       chronoController.stopChrono(req, res)
     );
 
+    app.get("/", (req, res) =>
+      res.json({ message: "Welcome to the Chrono API" })
+    );
+
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
