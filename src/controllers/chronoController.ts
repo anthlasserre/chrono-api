@@ -19,9 +19,9 @@ export class ChronoController {
       const chrono: Chrono = {
         id: uuidv4(),
         origin,
-        status: ChronoStatus.CREATED,
+        status: ChronoStatus.RUNNING,
         duration: 0,
-        startTime: null,
+        startTime: now,
         createdAt: now,
         updatedAt: now,
         getCurrentDuration: () => {
@@ -30,7 +30,13 @@ export class ChronoController {
       };
 
       await this.db.createChrono(chrono);
-      res.status(201).json(chrono);
+      const currentDurationMs = chrono.getCurrentDuration();
+      const response = {
+        ...chrono,
+        currentDurationMs,
+        currentDurationFormatted: formatDuration(currentDurationMs),
+      };
+      res.status(201).json(response);
     } catch (error) {
       res.status(500).json({ error: "Failed to create chrono" });
     }

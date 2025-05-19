@@ -5,6 +5,7 @@ A TypeScript Express.js API for managing chronos (timers) with SQLite database i
 ## Features
 
 - Create, start, pause, and stop chronos
+- Automatic start on creation
 - Real-time duration tracking
 - SQLite database with TypeORM
 - TypeScript support
@@ -42,7 +43,7 @@ npm run dev
 
 ## API Endpoints
 
-### Create a new chrono
+### Create a new chrono (automatically starts)
 ```http
 POST /chronos
 Content-Type: application/json
@@ -96,8 +97,7 @@ Example response for a chrono:
 
 ## Status Types
 
-- `CREATED`: Initial state when chrono is created
-- `RUNNING`: Chrono is currently running
+- `RUNNING`: Chrono is currently running (default state on creation)
 - `PAUSED`: Chrono is paused
 - `STOPPED`: Chrono is stopped
 
