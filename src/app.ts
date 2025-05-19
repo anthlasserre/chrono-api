@@ -2,11 +2,15 @@ import "reflect-metadata";
 import express from "express";
 import { ChronoController } from "./controllers/chronoController";
 import { AppDataSource } from "./config/database";
+import { apiKeyAuth } from "./middleware/apiKeyAuth";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+
+// Apply API key authentication to all routes
+app.use(apiKeyAuth);
 
 // Initialize TypeORM
 AppDataSource.initialize()
