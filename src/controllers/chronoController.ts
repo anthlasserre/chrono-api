@@ -1,0 +1,142 @@
+import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
+import { Chrono, ChronoStatus } from "../types/chrono";
+import { DatabaseService } from "../services/database";
+import { formatDuration } from "../utils/date";
+
+export class ChronoController {
+  private db: DatabaseService;
+
+  constructor() {
+    this.db = new DatabaseService();
+  }
+
+  async createChrono(req: Request, res: Response) {
+    try {
+      const { origin } = req.body;
+      const now = new Date().toISOString();
+
+      const chrono: Chrono = {
+        id: uuidv4(),
+        origin,
+        status: ChronoStatus.CREATED,
+        duration: 0,
+        startTime: null,
+        createdAt: now,
+        updatedAt: now,
+        getCurrentDuration: () => {
+          return 0;
+        },
+      };
+
+      await this.db.createChrono(chrono);
+      res.status(201).json(chrono);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create chrono" });
+    }
+  }
+
+  async startChrono(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const chrono = await this.db.getChrono(id);
+
+      if (!chrono) {
+        return res.status(404).json({ error: "Chrono not found" });
+      }
+
+      if (chrono.status === ChronoStatus.RUNNING) {
+        return res.status(400).json({ error: "Chrono is already running" });
+      }
+
+      await this.db.updateChronoStatus(id, ChronoStatus.RUNNING);
+      const updatedChrono = await this.db.getChrono(id);
+      res.json(updatedChrono);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to start chrono" });
+    }
+  }
+
+  async pauseChrono(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const chrono = await this.db.getChrono(id);
+
+      if (!chrono) {
+        return res.status(404).json({ error: "Chrono not found" });
+      }
+
+      if (chrono.status !== ChronoStatus.RUNNING) {
+        return res.status(400).json({ error: "Chrono is not running" });
+      }
+
+      await this.db.updateChronoStatus(id, ChronoStatus.PAUSED);
+      const updatedChrono = await this.db.getChrono(id);
+      res.json(updatedChrono);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to pause chrono" });
+    }
+  }
+
+  async stopChrono(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const chrono = await this.db.getChrono(id);
+
+      if (!chrono) {
+        return res.status(404).json({ error: "Chrono not found" });
+      }
+
+      if (chrono.status === ChronoStatus.STOPPED) {
+        return res.status(400).json({ error: "Chrono is already stopped" });
+      }
+
+      await this.db.updateChronoStatus(id, ChronoStatus.STOPPED);
+      const updatedChrono = await this.db.getChrono(id);
+      res.json(updatedChrono);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to stop chrono" });
+    }
+  }
+
+  async getChrono(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const chrono = await this.db.getChrono(id);
+
+      if (!chrono) {
+        return res.status(404).json({ error: "Chrono not found" });
+      }
+
+      // Calculate current duration if the chrono is running
+      const currentDurationMs = chrono.getCurrentDuration();
+      const response = {
+        ...chrono,
+        currentDurationMs,
+        currentDurationFormatted: formatDuration(currentDurationMs),
+      };
+
+      res.json(response);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get chrono" });
+    }
+  }
+
+  async getAllChronos(req: Request, res: Response) {
+    try {
+      const chronos = await this.db.getAllChronos();
+      // Calculate current duration for all running chronos
+      const response = chronos.map((chrono) => {
+        const currentDurationMs = chrono.getCurrentDuration();
+        return {
+          ...chrono,
+          currentDurationMs,
+          currentDurationFormatted: formatDuration(currentDurationMs),
+        };
+      });
+      res.json(response);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get chronos" });
+    }
+  }
+}
