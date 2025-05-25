@@ -3,12 +3,13 @@ import express from "express";
 import { ChronoController } from "./controllers/chronoController";
 import { AppDataSource } from "./config/database";
 import { apiKeyAuth } from "./middleware/apiKeyAuth";
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
-
+app.use(cors());
 // Apply API key authentication to all routes
 app.use(apiKeyAuth);
 
