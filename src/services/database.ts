@@ -46,4 +46,11 @@ export class DatabaseService {
   async getAllChronos(): Promise<Chrono[]> {
     return await this.chronoRepository.find();
   }
+
+  async setChronoDuration(id: string, duration: number): Promise<void> {
+    await this.chronoRepository.update(id, {
+      status: ChronoStatus.STOPPED,
+      duration,
+    });
+  }
 }

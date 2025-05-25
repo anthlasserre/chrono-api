@@ -32,6 +32,9 @@ AppDataSource.initialize()
     app.post("/chronos/:id/stop", (req, res) =>
       chronoController.stopChrono(req, res)
     );
+    app.put("/chronos/:id", (req, res) =>
+      chronoController.setChronoDuration(req, res)
+    );
 
     app.get("/", (req, res) =>
       res.json({ message: "Welcome to the Chrono API" })

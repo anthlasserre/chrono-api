@@ -145,4 +145,22 @@ export class ChronoController {
       res.status(500).json({ error: "Failed to get chronos" });
     }
   }
+
+  async setChronoDuration(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { duration } = req.body;
+      const chrono = await this.db.getChrono(id);
+
+      if (!chrono) {
+        return res.status(404).json({ error: "Chrono not found" });
+      }
+
+      await this.db.setChronoDuration(id, duration);
+      const updatedChrono = await this.db.getChrono(id);
+      res.json(updatedChrono);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to set chrono" });
+    }
+  }
 }
