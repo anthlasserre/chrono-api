@@ -16,7 +16,7 @@ export class AblyService {
 
   async publishChronoUpdate(chrono: Chrono): Promise<void> {
     try {
-      await this.channel.publish("chrono-change", {
+      await this.channel.publish(`chrono|${chrono.id}`, {
         id: chrono.id,
         status: chrono.status,
         duration: chrono.getCurrentDuration(),
