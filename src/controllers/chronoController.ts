@@ -2,13 +2,20 @@ import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 import { Chrono, ChronoStatus } from "../types/chrono";
 import { DatabaseService } from "../services/database";
+import { AblyService } from "../services/ably";
 import { formatDuration } from "../utils/date";
 
 export class ChronoController {
   private db: DatabaseService;
+  private ably: AblyService;
 
   constructor() {
     this.db = new DatabaseService();
+    this.ably = new AblyService();
+  }
+
+  private async publishUpdate(chrono: Chrono) {
+    await this.ably.publishChronoUpdate(chrono);
   }
 
   async createChrono(req: Request, res: Response) {
@@ -30,6 +37,7 @@ export class ChronoController {
       };
 
       await this.db.createChrono(chrono);
+
       const currentDurationMs = chrono.getCurrentDuration();
       const response = {
         ...chrono,
@@ -57,6 +65,9 @@ export class ChronoController {
 
       await this.db.updateChronoStatus(id, ChronoStatus.RUNNING);
       const updatedChrono = await this.db.getChrono(id);
+      if (updatedChrono) {
+        await this.publishUpdate(updatedChrono);
+      }
       res.json(updatedChrono);
     } catch (error) {
       res.status(500).json({ error: "Failed to start chrono" });
@@ -78,6 +89,9 @@ export class ChronoController {
 
       await this.db.updateChronoStatus(id, ChronoStatus.PAUSED);
       const updatedChrono = await this.db.getChrono(id);
+      if (updatedChrono) {
+        await this.publishUpdate(updatedChrono);
+      }
       res.json(updatedChrono);
     } catch (error) {
       res.status(500).json({ error: "Failed to pause chrono" });
@@ -99,6 +113,9 @@ export class ChronoController {
 
       await this.db.updateChronoStatus(id, ChronoStatus.STOPPED);
       const updatedChrono = await this.db.getChrono(id);
+      if (updatedChrono) {
+        await this.publishUpdate(updatedChrono);
+      }
       res.json(updatedChrono);
     } catch (error) {
       res.status(500).json({ error: "Failed to stop chrono" });
@@ -158,6 +175,9 @@ export class ChronoController {
 
       await this.db.setChronoDuration(id, duration);
       const updatedChrono = await this.db.getChrono(id);
+      if (updatedChrono) {
+        await this.publishUpdate(updatedChrono);
+      }
       res.json(updatedChrono);
     } catch (error) {
       res.status(500).json({ error: "Failed to set chrono" });
