@@ -35,6 +35,9 @@ AppDataSource.initialize()
     app.put("/chronos/:id", (req, res) =>
       chronoController.setChronoDuration(req, res)
     );
+    app.delete("/chronos", (req, res) =>
+      chronoController.clearChronos(req, res)
+    );
 
     app.get("/", (req, res) =>
       res.json({ message: "Welcome to the Chrono API" })

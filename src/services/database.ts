@@ -53,4 +53,10 @@ export class DatabaseService {
       duration,
     });
   }
+
+  async clearChronos(origin: string): Promise<void> {
+    await this.chronoRepository.delete({
+      origin,
+    });
+  }
 }

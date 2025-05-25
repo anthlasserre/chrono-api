@@ -163,4 +163,14 @@ export class ChronoController {
       res.status(500).json({ error: "Failed to set chrono" });
     }
   }
+
+  async clearChronos(req: Request, res: Response) {
+    try {
+      const { origin } = req.body;
+      await this.db.clearChronos(origin);
+      res.json({ message: "Chronos cleared" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to clear chronos" });
+    }
+  }
 }
