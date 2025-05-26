@@ -49,7 +49,7 @@ export class DatabaseService {
 
   async setChronoDuration(id: string, duration: number): Promise<void> {
     await this.chronoRepository.update(id, {
-      status: ChronoStatus.STOPPED,
+      status: ChronoStatus.PAUSED,
       duration,
     });
   }
